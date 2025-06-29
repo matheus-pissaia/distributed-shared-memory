@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include "api.h"
 #include "memory.h"
+
+Process* processes; // Global variable for processes, provisory solution
+int current_process_id = 0; // Global variable for current process ID, provisory solution
 
 int main(int argc, char const *argv[])
 {
@@ -25,6 +30,44 @@ int main(int argc, char const *argv[])
         printf("\nUsage: ./compiled_file <block_size> <block_count> <process_count>\n");
         return 1;
     }
+
+    // Initialize processes
+    processes = (Process*)malloc(PROCESS_COUNT * sizeof(Process));
+    for(int i = 0; i < PROCESS_COUNT; i++)
+    {
+        init_process(&processes[i], i);
+    }
+
+    //Distribute blocks among processes
+    distribute_blocks(processes, PROCESS_COUNT);
+
+    //Test: write something to the first block of process 0
+    if (processes[0].num_local_blocks > 0)
+    {
+        MemoryBlock* block = &processes[0].local_blocks[0];
+        strcpy((char*)block->data, "Hello, World!");
+
+        //Test reading 
+        char buffer[100];
+        int result = read(0, buffer, 13); //Should read "Hello, World!"
+
+        if (result == 0)
+        {
+            buffer[12] = '\0'; // Null-terminate the string
+            printf("Read successful: %s\n", buffer);
+        }
+        else
+        {
+            printf("Read failed with error code: %d\n", result);
+        }
+    }
+    
+    //Free resources
+    for (int i = 0; i < PROCESS_COUNT; i++)
+    {
+        free_process(&processes[i]);
+    }
+    free(processes);
 
     return 0;
 }
