@@ -8,7 +8,7 @@
 int read(int position, char *buffer, int size)
 {
     if (position < 0 || size <= 0 || position + size > BLOCK_COUNT * BLOCK_SIZE) {
-        return -1; // Invalid parameters
+        return API_ERR_INVALID_PARAMS; 
     }
     
     int bytes_read = 0; // Number of bytes read
@@ -44,7 +44,7 @@ int read(int position, char *buffer, int size)
             continue;
         }
 
-        return -3;
+        return API_ERR_BLOCK_NOT_LOCAL;
 
     }
 
@@ -55,4 +55,16 @@ int write(int position, char *buffer, int size)
 {
     // TODO implement
     return 0;
+}
+
+const char* api_error_str(ApiErrorCode err) {
+    switch(err) {
+        case API_SUCCESS:          return "Success";
+        case API_ERR_INVALID_PARAMS: return "Invalid parameters (position < 0 or size <= 0)";
+        case API_ERR_BLOCK_BOUNDARY: return "Access crosses block boundary";
+        case API_ERR_REMOTE_READ:    return "Failed to read from remote block";
+        case API_ERR_CACHE_MISS:     return "Block not found in cache";
+        case API_ERR_BLOCK_NOT_LOCAL: return "Block is not owned by this process";
+        default:                     return "Unknown error";
+    }
 }

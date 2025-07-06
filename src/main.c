@@ -51,14 +51,9 @@ int main(int argc, char const *argv[])
         char buffer[100];
         int result = read(0, buffer, 13); //Should read "Hello, World!"
 
-        if (result == 0)
+        if (result !=0)
         {
-            buffer[12] = '\0'; // Null-terminate the string
-            printf("Read successful: %s\n", buffer);
-        }
-        else
-        {
-            printf("Read failed with error code: %d\n", result);
+            fprintf(stderr, "Error reading data: %s\n", api_error_str(result));
         }
     }
     
