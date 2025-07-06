@@ -94,7 +94,7 @@ CacheEntry *cache_get(Cache *cache, int block_id)
     return NULL;
 }
 
-void cache_set(Cache *cache, int block_id, unsigned char data)
+void cache_set(Cache *cache, int block_id, unsigned char *data)
 { //Simple implementation: find first invalid entry
     for (int i = 0; i < CACHE_SIZE; i++)
     {
@@ -107,7 +107,14 @@ void cache_set(Cache *cache, int block_id, unsigned char data)
             return;
         }
     }
-    // TODO implement (if cache is full apply some replacement policy?)
+    // Se chegou aqui, a cache está cheia - aplicar política de substituição
+    // Implementação simples: substitui a primeira entrada (poderia ser LRU, FIFO, etc.)
+    // TODO: Implementar uma política de substituição mais sofisticada
+    
+    cache->entries[0].block_id = block_id;
+    free(cache->entries[0].data); // Libera os dados antigos
+    cache->entries[0].data = (unsigned char *)malloc(BLOCK_SIZE * sizeof(unsigned char));
+    memcpy(cache->entries[0].data, data, BLOCK_SIZE);
 }
 
 
