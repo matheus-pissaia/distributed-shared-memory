@@ -9,9 +9,8 @@ extern int PROCESS_COUNT; // Number of processes (default to 4)
 
 typedef struct
 {
-    int block_id;        // ID of the block where the data is stored
-    int valid;           // 1 if the block is valid, 0 otherwise
-    unsigned char *data; // Data stored in the block (depends on BLOCK_SIZE)
+    int valid;              // 1 if the block is valid, 0 otherwise
+    MemoryBlock *mem_block; // Pointer to the cached memory block
 } CacheEntry;
 
 typedef struct
