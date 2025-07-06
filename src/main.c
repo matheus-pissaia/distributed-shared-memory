@@ -31,6 +31,13 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
+    // Validate BLOCK_SIZE
+    if ((BLOCK_COUNT % PROCESS_COUNT) != 0)
+    {
+        printf("\nBLOCK_COUNT must be divisible by PROCESS_COUNT! (Use powers of 2)\n");
+        exit(EXIT_FAILURE);
+    }
+
     // Initialize processes
     processes = (Process*)malloc(PROCESS_COUNT * sizeof(Process));
     for(int i = 0; i < PROCESS_COUNT; i++)

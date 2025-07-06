@@ -10,25 +10,22 @@ int PROCESS_COUNT = 4;
 void distribute_blocks(Process* processes, int num_processes)
 {
     int blocks_per_process = BLOCK_COUNT / num_processes;
-    int extra_blocks = BLOCK_COUNT % num_processes;
-    
-    int block_counter = 0;
+
 
     for (int i = 0; i < num_processes; i++)
     {
-        int blocks_for_this_process = blocks_per_process + (i < extra_blocks ? 1 : 0);
-        processes[i].local_blocks = (MemoryBlock*)malloc(blocks_for_this_process * sizeof(MemoryBlock));
-        processes[i].num_local_blocks = blocks_for_this_process;
+        processes[i].local_blocks = (MemoryBlock*)malloc(blocks_per_process * sizeof(MemoryBlock));
+        processes[i].num_local_blocks = blocks_per_process;
 
-        for (int j = 0; j < blocks_for_this_process; j++)
+        for (int j = 0; j < blocks_per_process; j++)
         {
-            processes[i].local_blocks[j].block_id = block_counter++;
+            int block_id = i * blocks_per_process + j;
+            processes[i].local_blocks[j].block_id = block_id;
             processes[i].local_blocks[j].owner_process = i;
             processes[i].local_blocks[j].data = (unsigned char*)malloc(BLOCK_SIZE * sizeof(unsigned char));
             
             memset(processes[i].local_blocks[j].data, 0, BLOCK_SIZE); // Initialize with zeros
 
-            block_counter++;
         }
 
         // Initialize cache for the process
