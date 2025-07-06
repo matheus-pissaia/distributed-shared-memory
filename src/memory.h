@@ -34,12 +34,37 @@ typedef struct
 } Process;
 
 /**
+ * @brief Gets the current process ID
+ * @return The current process ID
+ */
+int get_current_process_id();
+
+/**
+ * @brief Gets the process array
+ * @return Pointer to the process array
+ */
+Process* get_processes();
+
+
+/**
  * @brief Distributes blocks among processes using interval-based distribution
  * 
  * @param processes Array of processes
  * @param num_processes Number of processes
  */
 void distribute_blocks(Process* processes, int num_processes);
+
+/**
+ * @brief Initializes the global process structures
+ * @param num_processes Number of processes to create
+ */
+void init_processes(int num_processes);
+
+/**
+ * @brief Frees resources used by global process structures
+ */
+void free_processes();
+
 
 /**
  * @brief Finds a local block in a process

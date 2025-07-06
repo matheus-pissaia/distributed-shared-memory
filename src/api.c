@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern Process* processes; //Global variable for processes, provisory solution
-extern int current_process_id; // Global variable for current process ID, provisory solution
 
 int read(int position, char *buffer, int size)
 {
@@ -20,7 +18,7 @@ int read(int position, char *buffer, int size)
         return -2; // Read exceeds block size
     }
 
-    Process* current_process = &processes[current_process_id];
+    Process* current_process = &get_processes()[get_current_process_id()];
 
     CacheEntry* cache_entry = cache_get(current_process->cache, block_id);
     if (cache_entry != NULL && cache_entry->valid) {

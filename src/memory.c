@@ -7,6 +7,34 @@ int BLOCK_SIZE = 2048;
 int BLOCK_COUNT = 1024;
 int PROCESS_COUNT = 4;
 
+static Process* processes = NULL;
+static int current_process_id = 0;
+
+int get_current_process_id() {
+    return current_process_id;
+}
+
+Process* get_processes() {
+    return processes;
+}
+
+void init_processes(int num_processes) {
+    processes = (Process*)malloc(num_processes * sizeof(Process));
+    for (int i = 0; i < num_processes; i++) {
+        init_process(&processes[i], i);
+    }
+}
+
+void free_processes() {
+    if (processes != NULL) {
+        for (int i = 0; i < PROCESS_COUNT; i++) {
+            free_process(&processes[i]);
+        }
+        free(processes);
+        processes = NULL;
+    }
+}
+
 void distribute_blocks(Process* processes, int num_processes)
 {
     int blocks_per_process = BLOCK_COUNT / num_processes;

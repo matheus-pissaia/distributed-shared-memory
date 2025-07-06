@@ -4,9 +4,6 @@
 #include "api.h"
 #include "memory.h"
 
-Process* processes; // Global variable for processes, provisory solution
-int current_process_id = 0; // Global variable for current process ID, provisory solution
-
 int main(int argc, char const *argv[])
 {
     // Default values if no arguments
@@ -39,19 +36,15 @@ int main(int argc, char const *argv[])
     }
 
     // Initialize processes
-    processes = (Process*)malloc(PROCESS_COUNT * sizeof(Process));
-    for(int i = 0; i < PROCESS_COUNT; i++)
-    {
-        init_process(&processes[i], i);
-    }
+    init_processes(PROCESS_COUNT);
 
     //Distribute blocks among processes
-    distribute_blocks(processes, PROCESS_COUNT);
+    distribute_blocks(get_processes(), PROCESS_COUNT);
 
     //Test: write something to the first block of process 0
-    if (processes[0].num_local_blocks > 0)
+    if (get_processes()[0].num_local_blocks > 0)
     {
-        MemoryBlock* block = &processes[0].local_blocks[0];
+        MemoryBlock* block = &get_processes()[0].local_blocks[0];
         strcpy((char*)block->data, "Hello, World!");
 
         //Test reading 
@@ -70,11 +63,7 @@ int main(int argc, char const *argv[])
     }
     
     //Free resources
-    for (int i = 0; i < PROCESS_COUNT; i++)
-    {
-        free_process(&processes[i]);
-    }
-    free(processes);
+    free_processes();
 
     return 0;
 }
