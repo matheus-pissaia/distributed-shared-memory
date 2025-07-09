@@ -12,8 +12,7 @@ int DSM_PROCESS_RANK = 0;
 
 static Process *process; //  Internal variable to store the local process
 
-// Retrieves the process ID that owns the block.
-static int get_owner_from_block_id(int *block_id)
+int get_owner_from_block_id(int *block_id)
 {
     return *block_id % (DSM_BLOCK_COUNT / DSM_PROCESS_COUNT);
 }

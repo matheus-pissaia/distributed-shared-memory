@@ -36,6 +36,15 @@ typedef struct
 } Process;
 
 /**
+ * @brief Gets the ID of the process that owns a given block ID.
+ *
+ * @param block_id The ID of the block to find the owner for.
+ *
+ * @return The rank ID of the owner process.
+ */
+int get_owner_from_block_id(int *block_id);
+
+/**
  * @brief Initializes the local process struct
  *
  * @return Pointer to the initialized process struct
