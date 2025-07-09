@@ -3,11 +3,12 @@
 
 #include <stdbool.h>
 
-#define CACHE_SIZE 128 // Maximum number of entries in the cache
+#define DSM_CACHE_SIZE 128 // Maximum number of entries in the cache
 
-extern int BLOCK_SIZE;    // Block size in bytes (default to 2KB)
-extern int BLOCK_COUNT;   // Number of blocks (default to 1024)
-extern int PROCESS_COUNT; // Number of processes (default to 4)
+extern int DSM_BLOCK_SIZE;    // Block size in bytes (default to 2KB)
+extern int DSM_BLOCK_COUNT;   // Number of blocks (default to 1024)
+extern int DSM_PROCESS_COUNT; // Number of processes
+extern int DSM_PROCESS_RANK;  // Rank of the current process
 
 typedef struct
 {
@@ -24,7 +25,7 @@ typedef struct
 
 typedef struct
 {
-    CacheEntry entries[CACHE_SIZE]; // Vector of cache entries
+    CacheEntry entries[DSM_CACHE_SIZE]; // Vector of cache entries
 } Cache;
 
 typedef struct
