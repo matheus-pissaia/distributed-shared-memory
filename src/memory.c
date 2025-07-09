@@ -43,6 +43,7 @@ void memory_block_free(MemoryBlock *block)
     }
 }
 
+// Initializes the vector of memory blocks for the local process.
 static MemoryBlock *process_blocks_init()
 {
     int blocks_per_process = BLOCK_COUNT / PROCESS_COUNT;
