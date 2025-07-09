@@ -58,6 +58,23 @@ Process *process_get();
 MemoryBlock *process_block_get(int block_id);
 
 /**
+ * @brief Initializes a memory block with the given ID and data.
+ *
+ * @param block_id ID of the block to initialize.
+ * @param data Pointer to the data to initialize the block with.
+ *
+ * @return Pointer to the initialized MemoryBlock.
+ */
+MemoryBlock *memory_block_init(int block_id, unsigned char *data);
+
+/**
+ * @brief Frees the memory allocated for a MemoryBlock struct.
+ *
+ * @return Pointer to the memory block.
+ */
+void memory_block_free(MemoryBlock *block);
+
+/**
  * @brief Initializes a new cache.
  *
  * @return Pointer to the new created cache.

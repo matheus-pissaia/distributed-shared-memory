@@ -17,8 +17,9 @@ static int get_owner_from_block_id(int *block_id)
     return *block_id % (BLOCK_COUNT / PROCESS_COUNT);
 }
 
-// Initializes a memory block struct with the given block ID and data.
-static MemoryBlock *memory_block_init(int block_id, unsigned char *data)
+// -------------- MEMORY BLOCK FUNCTIONS --------------
+
+MemoryBlock *memory_block_init(int block_id, unsigned char *data)
 {
     MemoryBlock *block = malloc(sizeof(MemoryBlock));
 
@@ -29,6 +30,17 @@ static MemoryBlock *memory_block_init(int block_id, unsigned char *data)
     memset(block->data, *data, BLOCK_SIZE);
 
     return block;
+}
+
+void memory_block_free(MemoryBlock *block)
+{
+    if (block != NULL)
+    {
+        if (block->data != NULL)
+            free(block->data);
+
+        free(block);
+    }
 }
 
 static MemoryBlock *process_blocks_init()
@@ -46,6 +58,8 @@ static MemoryBlock *process_blocks_init()
     return blocks;
 }
 
+// -------------- PROCESS FUNCTIONS --------------
+
 Process *process_get()
 {
     return process;
@@ -53,8 +67,6 @@ Process *process_get()
 
 Process *process_init()
 {
-    process = malloc(sizeof(Process));
-
     process->rank_id = 0; // TODO: Initialize ID with MPI rank
     process->cache = cache_init();
     process->blocks = process_blocks_init();
@@ -74,6 +86,8 @@ MemoryBlock *process_block_get(int block_id)
 
     return NULL;
 }
+
+// -------------- CACHE FUNCTIONS --------------
 
 Cache *cache_init()
 {
