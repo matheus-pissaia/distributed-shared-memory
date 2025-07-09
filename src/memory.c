@@ -1,97 +1,78 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
+
 #include "memory.h"
 
 int BLOCK_SIZE = 2048;
 int BLOCK_COUNT = 1024;
 int PROCESS_COUNT = 4;
 
-static Process* processes = NULL;
-static int current_process_id = 0;
+static Process *process; //  Internal variable to store the local process
 
-int get_current_process_id() {
-    return current_process_id;
-}
-
-Process* get_processes() {
-    return processes;
-}
-
-void init_processes(int num_processes) {
-    processes = (Process*)malloc(num_processes * sizeof(Process));
-    for (int i = 0; i < num_processes; i++) {
-        init_process(&processes[i], i);
-    }
-}
-
-void free_processes() {
-    if (processes != NULL) {
-        for (int i = 0; i < PROCESS_COUNT; i++) {
-            free_process(&processes[i]);
-        }
-        free(processes);
-        processes = NULL;
-    }
-}
-
-void distribute_blocks(Process* processes, int num_processes)
+// Retrieves the process ID that owns the block.
+static int get_owner_from_block_id(int *block_id)
 {
-    int blocks_per_process = BLOCK_COUNT / num_processes;
-
-
-    for (int i = 0; i < num_processes; i++)
-    {
-        processes[i].local_blocks = (MemoryBlock*)malloc(blocks_per_process * sizeof(MemoryBlock));
-        processes[i].num_local_blocks = blocks_per_process;
-
-        for (int j = 0; j < blocks_per_process; j++)
-        {
-            int block_id = i * blocks_per_process + j;
-            processes[i].local_blocks[j].block_id = block_id;
-            processes[i].local_blocks[j].owner_process = i;
-            processes[i].local_blocks[j].data = (unsigned char*)malloc(BLOCK_SIZE * sizeof(unsigned char));
-            
-            memset(processes[i].local_blocks[j].data, 0, BLOCK_SIZE); // Initialize with zeros
-
-        }
-
-        // Initialize cache for the process
-        processes[i].cache = cache_init();
-    }
+    return *block_id % (BLOCK_COUNT / PROCESS_COUNT);
 }
 
-MemoryBlock* find_local_block(Process* process, int block_id)
+// Initializes a memory block struct with the given block ID and data.
+static MemoryBlock *memory_block_init(int block_id, unsigned char *data)
 {
-    for (int i = 0; i < process->num_local_blocks; i++)
+    MemoryBlock *block = malloc(sizeof(MemoryBlock));
+
+    block->id = block_id;
+    block->owner_id = get_owner_from_block_id(&block_id);
+    block->data = malloc(BLOCK_SIZE * sizeof(unsigned char));
+
+    memset(block->data, *data, BLOCK_SIZE);
+
+    return block;
+}
+
+static MemoryBlock *process_blocks_init()
+{
+    int blocks_per_process = BLOCK_COUNT / PROCESS_COUNT;
+    int block_id_offset = process->rank_id * blocks_per_process;
+
+    MemoryBlock *blocks = malloc(sizeof(MemoryBlock) * blocks_per_process);
+
+    for (int i = 0; i < blocks_per_process; i++)
     {
-        if (process->local_blocks[i].block_id == block_id)
-        {
-            return &process->local_blocks[i];
-        }
+        blocks[i] = *memory_block_init(i + block_id_offset, NULL);
     }
+
+    return blocks;
+}
+
+Process *process_get()
+{
+    return process;
+}
+
+Process *process_init()
+{
+    process = malloc(sizeof(Process));
+
+    process->rank_id = 0; // TODO: Initialize ID with MPI rank
+    process->cache = cache_init();
+    process->blocks = process_blocks_init();
+
+    return process;
+}
+
+MemoryBlock *process_block_get(int block_id)
+{
+    int blocks_per_process = BLOCK_COUNT / PROCESS_COUNT;
+
+    for (int i = 0; i < blocks_per_process; i++)
+    {
+        if (process->blocks[i].id == block_id)
+            return &process->blocks[i];
+    }
+
     return NULL;
-}
-
-void init_process(Process* process, int process_id)
-{
-    process->process_id = process_id;
-    process->local_blocks = NULL;
-    process->num_local_blocks = 0;
-    process->cache = NULL;
-}
-
-void free_process(Process* process)
-{
-    for (int i = 0; i < process->num_local_blocks; i++)
-    {
-        free(process->local_blocks[i].data);
-    }
-    free(process->local_blocks);
-    if (process->cache != NULL) {
-        free(process->cache);
-    }
-    
 }
 
 Cache *cache_init()
@@ -100,8 +81,8 @@ Cache *cache_init()
 
     for (int i = 0; i < CACHE_SIZE; i++)
     {
-        cache->entries[i].valid = 0;     // Initialize all entries as invalid
-        cache->entries[i].block_id = -1; // Initialize block_id to -1 (non-existent)
+        cache->entries[i].valid = true;
+        cache->entries[i].mem_block = NULL; // Init memory block pointer as NULL
     }
 
     return cache;
@@ -111,47 +92,55 @@ CacheEntry *cache_get(Cache *cache, int block_id)
 {
     for (int i = 0; i < CACHE_SIZE; i++)
     {
-        if (cache->entries[i].valid && cache->entries[i].block_id == block_id)
-        {
+        MemoryBlock *mem_block = cache->entries[i].mem_block;
+
+        if (mem_block != NULL && mem_block->id == block_id)
             return &cache->entries[i]; // Return the cache entry if found
-        }
     }
+
     return NULL;
 }
 
 void cache_set(Cache *cache, int block_id, unsigned char *data)
-{ //Simple implementation: find first invalid entry
+{
+    // Simple implementation: find first empty or invalid entry
     for (int i = 0; i < CACHE_SIZE; i++)
     {
-        if (!cache->entries[i].valid)
+        if (cache->entries[i].mem_block == NULL)
         {
-            cache->entries[i].block_id = block_id;
-            cache->entries[i].valid = 1;
-            cache->entries[i].data = (unsigned char *)malloc(BLOCK_SIZE * sizeof(unsigned char));
-            memcpy(cache->entries[i].data, &data, BLOCK_SIZE); // Copy data into the cache entry
+            cache->entries[i].mem_block = memory_block_init(block_id, data);
+
+            return;
+        }
+
+        else if (!cache->entries[i].valid)
+        {
+            free(cache->entries[i].mem_block); // Free old invalid memory block
+            cache->entries[i].valid = true;
+            cache->entries[i].mem_block = memory_block_init(block_id, data);
+
             return;
         }
     }
+
     // Se chegou aqui, a cache está cheia - aplicar política de substituição
     // Implementação simples: substitui a primeira entrada (poderia ser LRU, FIFO, etc.)
     // TODO: Implementar uma política de substituição mais sofisticada
-    
-    cache->entries[0].block_id = block_id;
-    free(cache->entries[0].data); // Libera os dados antigos
-    cache->entries[0].data = (unsigned char *)malloc(BLOCK_SIZE * sizeof(unsigned char));
-    memcpy(cache->entries[0].data, data, BLOCK_SIZE);
-}
 
+    free(cache->entries[0].mem_block); // Free the old memory block
+    cache->entries[0].valid = true;
+    cache->entries[0].mem_block = memory_block_init(block_id, data);
+}
 
 void cache_invalidate(Cache *cache, int block_id)
 {
     for (int i = 0; i < CACHE_SIZE; i++)
     {
-        if ( cache->entries[i].block_id == block_id)
+        MemoryBlock *mem_block = cache->entries[i].mem_block;
+
+        if (mem_block != NULL && mem_block->id == block_id)
         {
-            cache->entries[i].valid = 0; // Invalidate the cache entry
-            free(cache->entries[i].data); // Free the data memory
-            cache->entries[i].data = NULL; // Set data pointer to NULL
+            cache->entries[i].valid = false;
             return;
         }
     }
