@@ -12,9 +12,9 @@ extern int DSM_PROCESS_RANK;  // Rank of the current process
 
 typedef struct
 {
-    int id;              // ID of the block
-    unsigned char *data; // Data stored in the block (depends on BLOCK_SIZE)
-    int owner_id;        // Process rank ID that owns this block
+    int id;       // ID of the block
+    char *data;   // Data stored in the block (depends on BLOCK_SIZE)
+    int owner_id; // Process rank ID that owns this block
 } MemoryBlock;
 
 typedef struct
@@ -75,7 +75,7 @@ MemoryBlock *process_block_get(int block_id);
  *
  * @return Pointer to the initialized MemoryBlock.
  */
-MemoryBlock *memory_block_init(int block_id, unsigned char *data);
+MemoryBlock *memory_block_init(int block_id, char *data);
 
 /**
  * @brief Frees the memory allocated for a MemoryBlock struct.
@@ -108,7 +108,7 @@ CacheEntry *cache_get(Cache *cache, int block_id);
  * @param block_id ID of the block to set.
  * @param data Pointer to the data to set in the block.
  */
-void cache_set(Cache *cache, int block_id, unsigned char *data);
+void cache_set(Cache *cache, int block_id, char *data);
 
 /**
  * @brief Invalidates an entry in the cache.

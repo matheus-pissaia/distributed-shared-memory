@@ -19,13 +19,13 @@ int get_owner_from_block_id(int *block_id)
 
 // -------------- MEMORY BLOCK FUNCTIONS --------------
 
-MemoryBlock *memory_block_init(int block_id, unsigned char *data)
+MemoryBlock *memory_block_init(int block_id, char *data)
 {
     MemoryBlock *block = malloc(sizeof(MemoryBlock));
 
     block->id = block_id;
     block->owner_id = get_owner_from_block_id(&block_id);
-    block->data = malloc(DSM_BLOCK_SIZE * sizeof(unsigned char));
+    block->data = malloc(DSM_BLOCK_SIZE * sizeof(char));
 
     memset(block->data, *data, DSM_BLOCK_SIZE);
 
@@ -116,7 +116,7 @@ CacheEntry *cache_get(Cache *cache, int block_id)
     return NULL;
 }
 
-void cache_set(Cache *cache, int block_id, unsigned char *data)
+void cache_set(Cache *cache, int block_id, char *data)
 {
     // Simple implementation: find first empty or invalid entry
     for (int i = 0; i < DSM_CACHE_SIZE; i++)
