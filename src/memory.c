@@ -67,6 +67,8 @@ Process *process_get()
 
 Process *process_init()
 {
+    process = malloc(sizeof(Process));
+
     process->rank_id = -1; // Rank ID will be set during MPI initialization
     process->cache = cache_init();
     process->blocks = process_blocks_init();
