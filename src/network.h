@@ -1,6 +1,8 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#define MSG_DATA_MAX_SIZE 256 // Message data maximum size in bytes
+
 typedef enum
 {
     OP_READ_REQ = 100,
@@ -12,10 +14,10 @@ typedef enum
 
 typedef struct
 {
-    DsmOpCode opcode; // Operation code indicating the type
-    int position;     // Absolute position in the memory
-    int size;         // Size of the data to be read or written in bytes
-    char data[];      // Data to be sent or received
+    DsmOpCode opcode;             // Operation code indicating the type
+    int position;                 // Absolute position in the memory
+    int size;                     // Size of the data to be read/written in bytes
+    char data[MSG_DATA_MAX_SIZE]; // Data to be sent or received
 } DsmMsg;
 
 /**
