@@ -107,8 +107,10 @@ CacheEntry *cache_get(Cache *cache, int block_id);
  * @param cache Pointer to the cache.
  * @param block_id ID of the block to set.
  * @param data Pointer to the data to set in the block.
+ *
+ * @return Pointer to the new cache entry.
  */
-void cache_set(Cache *cache, int block_id, char *data);
+CacheEntry *cache_set(Cache *cache, int block_id, char *data);
 
 /**
  * @brief Invalidates an entry in the cache.

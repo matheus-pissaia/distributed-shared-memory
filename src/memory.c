@@ -116,25 +116,26 @@ CacheEntry *cache_get(Cache *cache, int block_id)
     return NULL;
 }
 
-void cache_set(Cache *cache, int block_id, char *data)
+CacheEntry *cache_set(Cache *cache, int block_id, char *data)
 {
     // Simple implementation: find first empty or invalid entry
     for (int i = 0; i < DSM_CACHE_SIZE; i++)
     {
-        if (cache->entries[i].mem_block == NULL)
-        {
-            cache->entries[i].mem_block = memory_block_init(block_id, data);
+        CacheEntry *entry = &cache->entries[i];
 
-            return;
+        if (entry->mem_block == NULL)
+        {
+            entry->mem_block = memory_block_init(block_id, data);
+            return entry;
         }
 
-        else if (!cache->entries[i].valid)
+        else if (!entry->valid)
         {
-            free(cache->entries[i].mem_block); // Free old invalid memory block
-            cache->entries[i].valid = true;
-            cache->entries[i].mem_block = memory_block_init(block_id, data);
+            memory_block_free(entry->mem_block); // Free old invalid memory block
+            entry->valid = true;
+            entry->mem_block = memory_block_init(block_id, data);
 
-            return;
+            return entry;
         }
     }
 
@@ -142,9 +143,10 @@ void cache_set(Cache *cache, int block_id, char *data)
     // Implementação simples: substitui a primeira entrada (poderia ser LRU, FIFO, etc.)
     // TODO: Implementar uma política de substituição mais sofisticada
 
-    free(cache->entries[0].mem_block); // Free the old memory block
+    memory_block_free(cache->entries[0].mem_block); // Free the old memory block
     cache->entries[0].valid = true;
     cache->entries[0].mem_block = memory_block_init(block_id, data);
+    return &cache->entries[0];
 }
 
 void cache_invalidate(Cache *cache, int block_id)
