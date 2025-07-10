@@ -130,7 +130,7 @@ void comm_process_requests()
             {
                 // Set new data for the last block before processing a new one
                 if (last_block != NULL)
-                    memory_block_set(&last_block, &updated_data);
+                    memory_block_set(last_block, updated_data);
 
                 last_block = memory_block_get(&block_id);
                 // Copy the block to the updated data buffer
@@ -138,7 +138,7 @@ void comm_process_requests()
             }
 
             updated_data[offset] = req.data[i];
-            memory_block_set(&last_block, &updated_data);
+            memory_block_set(last_block, updated_data);
         }
 
         // Send write response status
