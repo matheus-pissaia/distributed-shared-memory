@@ -9,4 +9,4 @@ make rebuild
 
 # Run the compiled code.
 echo "Running code..."
-./bin/a.out
+mpirun -np 2 ./bin/a.out
