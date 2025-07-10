@@ -7,12 +7,14 @@
 
 void broadcast_invalidate(int block_id)
 {
-    for (int p = 0; p < DSM_PROCESS_COUNT; ++p)
+    Process *local_process = process_get();
+
+    for (int p_rank = 0; p_rank < DSM_PROCESS_COUNT; p_rank++)
     {
-        if (p == DSM_PROCESS_RANK)
+        if (p_rank == local_process->rank_id)
             continue;
 
-        MPI_Send(&block_id, 1, MPI_INT, p, OP_INVALIDATE, MPI_COMM_WORLD);
+        MPI_Send(&block_id, 1, MPI_INT, p_rank, OP_INVALIDATE, MPI_COMM_WORLD);
     }
 }
 
@@ -86,10 +88,12 @@ void comm_process_requests()
 
 void comm_init(int *argc, char ***argv)
 {
+    Process *local_process = process_get();
+
     // Initialize MPI environment
     MPI_Init(argc, argv);
 
-    MPI_Comm_rank(MPI_COMM_WORLD, &DSM_PROCESS_RANK);
+    MPI_Comm_rank(MPI_COMM_WORLD, &local_process->rank_id);
     MPI_Comm_size(MPI_COMM_WORLD, &DSM_PROCESS_COUNT);
 }
 

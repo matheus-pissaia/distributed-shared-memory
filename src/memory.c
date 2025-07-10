@@ -8,7 +8,6 @@
 int DSM_BLOCK_SIZE = 2048;
 int DSM_BLOCK_COUNT = 1024;
 int DSM_PROCESS_COUNT = 0;
-int DSM_PROCESS_RANK = 0;
 
 static Process *process; //  Internal variable to store the local process
 
@@ -68,7 +67,7 @@ Process *process_get()
 
 Process *process_init()
 {
-    process->rank_id = 0; // TODO: Initialize ID with MPI rank
+    process->rank_id = -1; // Rank ID will be set during MPI initialization
     process->cache = cache_init();
     process->blocks = process_blocks_init();
 

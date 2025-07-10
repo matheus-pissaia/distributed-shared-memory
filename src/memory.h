@@ -8,7 +8,6 @@
 extern int DSM_BLOCK_SIZE;    // Block size in bytes (default to 2KB)
 extern int DSM_BLOCK_COUNT;   // Number of blocks (default to 1024)
 extern int DSM_PROCESS_COUNT; // Number of processes
-extern int DSM_PROCESS_RANK;  // Rank of the current process
 
 typedef struct
 {
