@@ -18,6 +18,72 @@ void broadcast_invalidate(int block_id)
     }
 }
 
+static MemoryBlock *memory_block_fetch(int *block_id)
+{
+    Process *local_process = process_get();
+
+    DsmMsg msg;
+    msg.opcode = OP_READ_REQ;
+    msg.position = *block_id * DSM_BLOCK_SIZE; // Start position from block ID
+    msg.size = DSM_BLOCK_SIZE;                 // Read the entire block
+
+    char block_data[DSM_BLOCK_SIZE]; // Buffer to hold the block data response
+    int owner_rank_id = get_owner_from_block_id(block_id);
+
+    MPI_Send(&msg, sizeof(DsmMsg), MPI_BYTE, owner_rank_id, OP_READ_REQ, MPI_COMM_WORLD);
+    MPI_Recv(&block_data, DSM_BLOCK_SIZE, MPI_BYTE, owner_rank_id, OP_READ_RESP, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+    CacheEntry *new_entry = cache_set(local_process->cache, *block_id, block_data);
+
+    return new_entry->mem_block;
+}
+
+static MemoryBlock *memory_block_get(int *block_id)
+{
+    Process *local_process = process_get();
+    int owner_rank_id = get_owner_from_block_id(block_id);
+
+    // If the block is owned by the local process, return it
+    if (owner_rank_id == local_process->rank_id)
+        return process_block_get(*block_id);
+
+    CacheEntry *cache_entry = cache_get(local_process->cache, *block_id);
+
+    // If the block is in the cache, return it
+    if (cache_entry != NULL && cache_entry->valid)
+        return cache_entry->mem_block;
+
+    // The block is not in the cache, so we must fetch it from the owner process
+    return memory_block_fetch(block_id);
+}
+
+static void memory_block_set(MemoryBlock *block, char *data)
+{
+    Process *local_process = process_get();
+    int owner_rank_id = get_owner_from_block_id(&block->id);
+
+    // If the block is owned by the local process, set it directly
+    if (owner_rank_id == local_process->rank_id)
+    {
+        memcpy(block->data, data, DSM_BLOCK_SIZE);
+        broadcast_invalidate(block->id);
+        return;
+    }
+
+    // Send a write request to the owner
+    DsmMsg msg;
+    msg.opcode = OP_WRITE_REQ;
+    msg.position = block->id * DSM_BLOCK_SIZE; // Start position from block ID
+    msg.size = DSM_BLOCK_SIZE;                 // Write the entire block
+    memcpy(msg.data, data, DSM_BLOCK_SIZE);    // Copy the data to be written
+
+    MPI_Send(&msg, sizeof(DsmMsg), MPI_BYTE, owner_rank_id, OP_WRITE_REQ, MPI_COMM_WORLD);
+
+    // TODO Handle write response status
+    // MPI_Status status;
+    // MPI_Recv(NULL, 0, MPI_BYTE, owner_rank_id, OP_WRITE_RESP, MPI_COMM_WORLD, &status);
+}
+
 // Process pending requests
 void comm_process_requests()
 {
@@ -101,70 +167,4 @@ void comm_finalize()
 {
     // Finalize MPI environment
     MPI_Finalize();
-}
-
-static MemoryBlock *memory_block_get(int *block_id)
-{
-    Process *local_process = process_get();
-    int owner_rank_id = get_owner_from_block_id(block_id);
-
-    // If the block is owned by the local process, return it
-    if (owner_rank_id == local_process->rank_id)
-        return process_block_get(*block_id);
-
-    CacheEntry *cache_entry = cache_get(local_process->cache, *block_id);
-
-    // If the block is in the cache, return it
-    if (cache_entry != NULL && cache_entry->valid)
-        return cache_entry->mem_block;
-
-    // The block is not in the cache, so we must fetch it from the owner process
-    return memory_block_fetch(block_id);
-}
-
-static void *memory_block_set(MemoryBlock *block, char *data)
-{
-    Process *local_process = process_get();
-    int owner_rank_id = get_owner_from_block_id(&block->id);
-
-    // If the block is owned by the local process, set it directly
-    if (owner_rank_id == local_process->rank_id)
-    {
-        memcpy(block->data, data, DSM_BLOCK_SIZE);
-        broadcast_invalidate(block->id);
-        return;
-    }
-
-    // Send a write request to the owner
-    DsmMsg msg;
-    msg.opcode = OP_WRITE_REQ;
-    msg.position = block->id * DSM_BLOCK_SIZE; // Start position from block ID
-    msg.size = DSM_BLOCK_SIZE;                 // Write the entire block
-    memcpy(msg.data, data, DSM_BLOCK_SIZE);    // Copy the data to be written
-
-    MPI_Send(&msg, sizeof(DsmMsg), MPI_BYTE, owner_rank_id, OP_WRITE_REQ, MPI_COMM_WORLD);
-
-    // TODO Handle write response status
-    // MPI_Status status;
-    // MPI_Recv(NULL, 0, MPI_BYTE, owner_rank_id, OP_WRITE_RESP, MPI_COMM_WORLD, &status);
-}
-
-static MemoryBlock *memory_block_fetch(int *block_id)
-{
-    Process *local_process = process_get();
-
-    DsmMsg msg;
-    msg.opcode = OP_READ_REQ;
-    msg.position = *block_id * DSM_BLOCK_SIZE; // Start position from block ID
-    msg.size = DSM_BLOCK_SIZE;                 // Read the entire block
-
-    char *block_data[DSM_BLOCK_SIZE]; // Buffer to hold the block data response
-    int owner_rank_id = get_owner_from_block_id(block_id);
-
-    MPI_Send(&msg, sizeof(DsmMsg), MPI_BYTE, owner_rank_id, OP_READ_REQ, MPI_COMM_WORLD);
-    MPI_Recv(block_data, DSM_BLOCK_SIZE, MPI_BYTE, owner_rank_id, OP_READ_RESP, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-    CacheEntry *new_entry = cache_set(local_process->cache, *block_id, block_data);
-
-    return new_entry->mem_block;
 }
