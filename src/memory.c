@@ -14,7 +14,7 @@ static Process *process; //  Internal variable to store the local process
 
 int get_owner_from_block_id(int *block_id)
 {
-    return *block_id % (DSM_BLOCK_COUNT / DSM_PROCESS_COUNT);
+    return *block_id / (DSM_BLOCK_COUNT / DSM_PROCESS_COUNT);
 }
 
 // -------------- MEMORY BLOCK FUNCTIONS --------------
