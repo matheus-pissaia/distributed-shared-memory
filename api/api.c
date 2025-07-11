@@ -18,7 +18,7 @@ static int dsm_connect(int *sock_fd)
     server_end.sin_addr.s_addr = inet_addr(DSM_SOCKET_HOST);
     server_end.sin_port = htons(DSM_SOCKET_DEFAULT_PORT);
 
-    if ((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    if ((*sock_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         return SOCKET_CREATION_ERROR;
 
     if (connect(*sock_fd, (struct sockaddr *)&server_end, sizeof(server_end)) == -1)
@@ -52,7 +52,7 @@ int dsm_write(int position, char *buffer, int size)
     char request[DSM_SOCKET_MAX_BUFFER];
 
     dsm_connect(&sock_fd);
-    sprintf(request, "%s %d %d", WRITE_OP, position, size, buffer);
+    sprintf(request, "%s %d %d %s", WRITE_OP, position, size, buffer);
     write(sock_fd, &request, strlen(request));
 
     char response[DSM_SOCKET_MAX_BUFFER];
