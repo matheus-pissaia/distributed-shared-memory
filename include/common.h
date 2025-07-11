@@ -1,0 +1,13 @@
+#ifndef DSM_COMMON_H
+#define DSM_COMMON_H
+
+#define DSM_SOCKET_HOST "127.0.0.1"
+#define DSM_SOCKET_DEFAULT_PORT 10000
+#define DSM_SOCKET_MAX_BUFFER 256
+#define DSM_SOCKET_MAX_CLIENTS 16
+
+extern int DSM_BLOCK_SIZE;
+extern int DSM_BLOCK_COUNT;
+extern int DSM_PROCESS_COUNT;
+
+#endif

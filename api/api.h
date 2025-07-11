@@ -1,13 +1,13 @@
-#ifndef API_H
-#define API_H
+#ifndef DSM_API_H
+#define DSM_API_H
 
-typedef enum {
-    API_SUCCESS = 0,          // Operação bem-sucedida
-    API_ERR_INVALID_PARAMS = -1,  // Parâmetros inválidos
-    API_ERR_BLOCK_BOUNDARY = -2,  // Acesso além do limite do bloco
-    API_ERR_REMOTE_READ = -3,     // Falha na leitura remota
-    API_ERR_CACHE_MISS = -4,      // Bloco não encontrado na cache
-    API_ERR_BLOCK_NOT_LOCAL = -5  // Bloco não é local (owner diferente)
+#define READ_OP "READ"
+#define WRITE_OP "WRITE"
+
+typedef enum
+{
+    SOCKET_CREATION_ERROR = -1,
+    SOCKET_CONNECTION_ERROR = -2
 } ApiErrorCode;
 
 /**
@@ -38,13 +38,5 @@ int dsm_read(int position, char *buffer, int size);
  * @return
  */
 int dsm_write(int position, char *buffer, int size);
-
-
-/**
- * @brief Returns a descriptive string for API error codes
- * @param err The error code
- * @return Human-readable error message
- */
-const char* api_error_str(ApiErrorCode err);
 
 #endif
