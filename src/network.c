@@ -114,8 +114,7 @@ void comm_process_requests()
     {
         if (req.size <= 0 || req.position < 0)
         {
-            // TODO Return invalid parameters error
-            MPI_Send(-1, 1, MPI_INT, status.MPI_SOURCE, OP_WRITE_RESP, MPI_COMM_WORLD);
+            MPI_Send(NULL, 0, MPI_BYTE, status.MPI_SOURCE, DSM_INVALID_PARAMS, MPI_COMM_WORLD);
             return;
         }
 
@@ -144,8 +143,7 @@ void comm_process_requests()
     {
         if (req.size <= 0 || req.position < 0)
         {
-            // TODO Return invalid parameters error
-            MPI_Send(-1, 1, MPI_INT, status.MPI_SOURCE, OP_WRITE_RESP, MPI_COMM_WORLD);
+            MPI_Send(NULL, 0, MPI_BYTE, status.MPI_SOURCE, DSM_INVALID_PARAMS, MPI_COMM_WORLD);
             return;
         }
 

@@ -12,6 +12,11 @@ typedef enum
     OP_INVALIDATE = 300,
 } DsmOpCode;
 
+typedef enum
+{
+    DSM_INVALID_PARAMS = -1
+} DsmErrorCode;
+
 typedef struct
 {
     DsmOpCode opcode;             // Operation code indicating the type
