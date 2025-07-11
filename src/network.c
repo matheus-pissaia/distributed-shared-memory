@@ -154,12 +154,8 @@ void comm_process_requests()
 
 void comm_init(int *argc, char ***argv)
 {
-    Process *local_process = process_get();
-
     // Initialize MPI environment
     MPI_Init(argc, argv);
-
-    MPI_Comm_rank(MPI_COMM_WORLD, &local_process->rank_id);
     MPI_Comm_size(MPI_COMM_WORLD, &DSM_PROCESS_COUNT);
 }
 
