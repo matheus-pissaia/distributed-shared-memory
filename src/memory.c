@@ -27,7 +27,8 @@ MemoryBlock *memory_block_init(int block_id, char *data)
     block->owner_id = get_owner_from_block_id(&block_id);
     block->data = malloc(DSM_BLOCK_SIZE * sizeof(char));
 
-    memset(block->data, *data, DSM_BLOCK_SIZE);
+    if (data != NULL)
+        memset(block->data, *data, DSM_BLOCK_SIZE);
 
     return block;
 }
