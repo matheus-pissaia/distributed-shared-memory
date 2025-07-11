@@ -112,21 +112,33 @@ void comm_process_requests()
 
     if (req.opcode == OP_READ_REQ)
     {
-        char resp_data[req.size];       // Response data buffer
-        MemoryBlock *last_block = NULL; // Last block processed
-
-        for (int i = 0; i < req.size; i++)
+        if (req.size <= 0 || req.position < 0)
         {
-            int block_id = (req.position + i) / DSM_BLOCK_SIZE;
-            int offset = (req.position + i) % DSM_BLOCK_SIZE;
-
-            if (!last_block || block_id != last_block->id)
-                last_block = memory_block_get(&block_id);
-
-            resp_data[i] = last_block->data[offset];
+            // TODO Return invalid parameters error
+            MPI_Send(-1, 1, MPI_INT, status.MPI_SOURCE, OP_WRITE_RESP, MPI_COMM_WORLD);
+            return;
         }
 
-        MPI_Send(resp_data, DSM_BLOCK_SIZE, MPI_BYTE, status.MPI_SOURCE, OP_READ_RESP, MPI_COMM_WORLD);
+        char resp_data[req.size]; // Response data buffer
+        int processed = 0;
+
+        while (processed < req.size)
+        {
+            int abs_pos = req.position + processed;
+            int block_id = abs_pos / DSM_BLOCK_SIZE;
+            int block_offset = abs_pos % DSM_BLOCK_SIZE;
+            int chunk = DSM_BLOCK_SIZE - block_offset;
+
+            if (chunk > req.size - processed)
+                chunk = req.size - processed;
+
+            MemoryBlock *block = memory_block_get(&block_id);
+
+            memcpy(resp_data + processed, block->data + block_offset, chunk);
+            processed += chunk;
+        }
+
+        MPI_Send(resp_data, req.size, MPI_BYTE, status.MPI_SOURCE, OP_READ_RESP, MPI_COMM_WORLD);
     }
     else if (req.opcode == OP_WRITE_REQ)
     {
