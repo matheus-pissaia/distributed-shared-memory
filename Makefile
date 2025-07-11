@@ -1,35 +1,36 @@
 # Compiler and flags
-CC = mpicc
-CFLAGS = -Wall -Wextra
+CC       := mpicc
+CFLAGS   := -Wall -Wextra
 
 # Folders
-SRCDIR = src
-OBJDIR = obj
-BINDIR = bin
+SRCDIR   := src
+OBJDIR   := obj
+BINDIR   := bin
 
-# Files
-SRCS = $(wildcard $(SRCDIR)/*.c)
-OBJS = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRCS))
-TARGET = $(BINDIR)/a.out
+# Source & object files (recursive)
+SRCS     := $(shell find $(SRCDIR) -type f -name '*.c')
+OBJS     := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
 
-# Main rules
+# Final binary
+TARGET   := $(BINDIR)/a.out
+
+.PHONY: all prepare clean rebuild
+
 all: prepare $(TARGET)
 
-# Creating the final binary
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
-# Compiling each .c file
+# Compile each .c → .o, creating obj subdirs as needed
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Preparing each target folder
+# Make sure base folders exist
 prepare:
 	mkdir -p $(OBJDIR) $(BINDIR)
 
-# Cleaning the project
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)
 
-# Recompile from scratch
 rebuild: clean all
