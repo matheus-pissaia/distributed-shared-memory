@@ -103,7 +103,7 @@ void comm_process_requests()
         char resp_data[req.size];       // Response data buffer
         MemoryBlock *last_block = NULL; // Last block processed
 
-        for (size_t i = 0; i < req.size; i++)
+        for (int i = 0; i < req.size; i++)
         {
             int block_id = (req.position + i) / DSM_BLOCK_SIZE;
             int offset = (req.position + i) % DSM_BLOCK_SIZE;
@@ -121,7 +121,7 @@ void comm_process_requests()
         MemoryBlock *last_block = NULL; // Last block processed
         char *updated_data;             // Updated block data buffer
 
-        for (size_t i = 0; i < req.size; i++)
+        for (int i = 0; i < req.size; i++)
         {
             int block_id = (req.position + i) / DSM_BLOCK_SIZE;
             int offset = (req.position + i) % DSM_BLOCK_SIZE;
