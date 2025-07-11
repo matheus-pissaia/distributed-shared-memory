@@ -13,13 +13,13 @@ static int api_comm_init(MPI_Comm *comm)
 
     char port_name;
 
-    if (MPI_Lookup_name("dsm_service", MPI_INFO_NULL, port_name) != MPI_SUCCESS)
+    if (MPI_Lookup_name("dsm_service", MPI_INFO_NULL, &port_name) != MPI_SUCCESS)
     {
         fprintf(stderr, "Failed to lookup service name\n");
         return -1;
     }
 
-    return MPI_Comm_connect(port_name, MPI_INFO_NULL, 0, MPI_COMM_WORLD, comm);
+    return MPI_Comm_connect(&port_name, MPI_INFO_NULL, 0, MPI_COMM_WORLD, comm);
 }
 
 // Ends the MPI communication by disconnecting and finalizing MPI
