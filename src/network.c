@@ -57,15 +57,27 @@ static MemoryBlock *memory_block_get(int *block_id)
     return memory_block_fetch(block_id);
 }
 
-static void memory_block_set(MemoryBlock *block, char *data)
+/**
+ * @brief Sets the data of a block memory (local or remote).
+ *
+ * @param position The absolute position in the shared memory.
+ * @param offset The offset inside the block.
+ * @param data The data to be set.
+ * @param size The size of the data to be set.
+ */
+static void memory_block_set(int position, int offset, const char *data, int size)
 {
+    int block_id = position / DSM_BLOCK_SIZE;
+
     Process *local_process = process_get();
-    int owner_rank_id = get_owner_from_block_id(&block->id);
+    int owner_rank_id = get_owner_from_block_id(&block_id);
 
     // If the block is owned by the local process, set it directly
     if (owner_rank_id == local_process->rank_id)
     {
-        memcpy(block->data, data, DSM_BLOCK_SIZE);
+        MemoryBlock *block = process_block_get(block_id);
+
+        memcpy(block->data + offset, data, size);
         broadcast_invalidate(block->id);
         return;
     }
@@ -73,9 +85,9 @@ static void memory_block_set(MemoryBlock *block, char *data)
     // Send a write request to the owner
     DsmMsg msg;
     msg.opcode = OP_WRITE_REQ;
-    msg.position = block->id * DSM_BLOCK_SIZE; // Start position from block ID
-    msg.size = DSM_BLOCK_SIZE;                 // Write the entire block
-    memcpy(msg.data, data, DSM_BLOCK_SIZE);    // Copy the data to be written
+    msg.position = position;
+    msg.size = size;              // Write the entire block
+    memcpy(msg.data, data, size); // Copy the data to be written
 
     MPI_Send(&msg, sizeof(DsmMsg), MPI_BYTE, owner_rank_id, OP_WRITE_REQ, MPI_COMM_WORLD);
 
@@ -118,31 +130,27 @@ void comm_process_requests()
     }
     else if (req.opcode == OP_WRITE_REQ)
     {
-        MemoryBlock *last_block = NULL; // Last block processed
-        char *updated_data;             // Updated block data buffer
-
-        for (int i = 0; i < req.size; i++)
+        if (req.size <= 0 || req.position < 0)
         {
-            int block_id = (req.position + i) / DSM_BLOCK_SIZE;
-            int offset = (req.position + i) % DSM_BLOCK_SIZE;
-
-            if (!last_block || block_id != last_block->id)
-            {
-                // Set new data for the last block before processing a new one
-                if (last_block != NULL)
-                    memory_block_set(last_block, updated_data);
-
-                last_block = memory_block_get(&block_id);
-                // Copy the block to the updated data buffer
-                memcpy(updated_data, last_block->data, DSM_BLOCK_SIZE);
-            }
-
-            updated_data[offset] = req.data[i];
-            memory_block_set(last_block, updated_data);
+            // TODO Return invalid parameters error
+            MPI_Send(-1, 1, MPI_INT, status.MPI_SOURCE, OP_WRITE_RESP, MPI_COMM_WORLD);
+            return;
         }
 
-        // Send write response status
-        // MPI_Send(NULL, 0, MPI_BYTE, status.MPI_SOURCE, OP_WRITE_RESP, MPI_COMM_WORLD);
+        int processed = 0;
+
+        while (processed < req.size)
+        {
+            int abs_position = req.position + processed;
+            int block_offset = abs_position % DSM_BLOCK_SIZE;
+            int chunk_size = DSM_BLOCK_SIZE - block_offset;
+
+            if (chunk_size > req.size - processed)
+                chunk_size = req.size - processed;
+
+            memory_block_set(abs_position, block_offset, req.data + processed, chunk_size);
+            processed += chunk_size;
+        }
     }
     else if (req.opcode == OP_INVALIDATE)
     {
