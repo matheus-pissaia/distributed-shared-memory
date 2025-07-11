@@ -6,8 +6,8 @@
 
 #include "memory.h"
 
-int DSM_BLOCK_SIZE = 2048;
-int DSM_BLOCK_COUNT = 1024;
+int DSM_BLOCK_SIZE = 32;
+int DSM_BLOCK_COUNT = 2;
 int DSM_PROCESS_COUNT = 0;
 
 static Process *process; //  Internal variable to store the local process
