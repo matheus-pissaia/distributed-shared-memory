@@ -1,47 +1,52 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#define MSG_DATA_MAX_SIZE 256 // Message data maximum size in bytes
+
 typedef enum
 {
-    MSG_READ_REQUEST,
-    MSG_READ_RESPONSE,
-    MSG_WRITE_REQUEST,
-    MSG_WRITE_ACK,
-    MSG_INVALIDATE,
-} MessageType;
+    OP_READ_REQ = 100,
+    OP_READ_RESP = 101,
+    OP_WRITE_REQ = 200,
+    OP_WRITE_RESP = 201,
+    OP_INVALIDATE = 300,
+} DsmOpCode;
+
+typedef enum
+{
+    DSM_INVALID_PARAMS = -1
+} DsmErrorCode;
 
 typedef struct
 {
-    MessageType type;   // Type of the message
-    int block_id;       // ID of the block
-    int position;       // Position in the block
-    int size;           // Size of the data in bytes to read/write
-    unsigned char data; // Data associated with the message
-} Message;
+    DsmOpCode opcode;             // Operation code indicating the type
+    int position;                 // Absolute position in the memory
+    int size;                     // Size of the data to be read/written in bytes
+    char data[MSG_DATA_MAX_SIZE]; // Data to be sent or received
+} DsmMsg;
 
 /**
- * @brief Sends a message over a socket.
+ * @brief Initializes the communication layer.
  *
- * @param socket Socket to send the message over
- * @param msg Pointer to the message to send
+ * This function sets up the MPI environment and prepares the local memory.
+ * It should be called before any other communication functions.
  *
- * @return 0 on success, -1 on failure
+ * @param argc Number of command line arguments.
+ * @param argv Array of command line arguments.
  */
-int send_message(int socket, Message *msg);
+void comm_init(int *argc, char ***argv);
 
 /**
- * @brief Reads and handles a received message over a socket.
- *
- * The message is handled based on its type:
- * - MSG_READ_REQUEST: Request to read data from a block (read() from api)
- * - MSG_WRITE_REQUEST: Request to write data to a block (write() from api)
- * - MSG_INVALIDATE: Request to invalidate a block (invalidate cache)
- *
- * @param socket Socket to receive the message over
- * @param msg Pointer to the message to receive
- *
- * @return 0 on success, -1 on failure
+ * @brief Processes pending requests from other processes.
  */
-int receive_message(int socket, Message *msg);
+void comm_process_requests();
+
+/**
+ * @brief Finalizes the communication layer.
+ *
+ * This function cleans up the MPI environment and releases resources.
+ * It should be called at the end of the program.
+ */
+void comm_finalize();
 
 #endif

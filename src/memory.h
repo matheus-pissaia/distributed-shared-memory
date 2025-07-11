@@ -3,17 +3,17 @@
 
 #include <stdbool.h>
 
-#define CACHE_SIZE 128 // Maximum number of entries in the cache
+#define DSM_CACHE_SIZE 128 // Maximum number of entries in the cache
 
-extern int BLOCK_SIZE;    // Block size in bytes (default to 2KB)
-extern int BLOCK_COUNT;   // Number of blocks (default to 1024)
-extern int PROCESS_COUNT; // Number of processes (default to 4)
+extern int DSM_BLOCK_SIZE;    // Block size in bytes (default to 2KB)
+extern int DSM_BLOCK_COUNT;   // Number of blocks (default to 1024)
+extern int DSM_PROCESS_COUNT; // Number of processes
 
 typedef struct
 {
-    int id;              // ID of the block
-    unsigned char *data; // Data stored in the block (depends on BLOCK_SIZE)
-    int owner_id;        // Process rank ID that owns this block
+    int id;       // ID of the block
+    char *data;   // Data stored in the block (depends on BLOCK_SIZE)
+    int owner_id; // Process rank ID that owns this block
 } MemoryBlock;
 
 typedef struct
@@ -24,7 +24,7 @@ typedef struct
 
 typedef struct
 {
-    CacheEntry entries[CACHE_SIZE]; // Vector of cache entries
+    CacheEntry entries[DSM_CACHE_SIZE]; // Vector of cache entries
 } Cache;
 
 typedef struct
@@ -33,6 +33,15 @@ typedef struct
     MemoryBlock *blocks; // Local memory blocks for the process
     Cache *cache;        // Cache of remote blocks
 } Process;
+
+/**
+ * @brief Gets the ID of the process that owns a given block ID.
+ *
+ * @param block_id The ID of the block to find the owner for.
+ *
+ * @return The rank ID of the owner process.
+ */
+int get_owner_from_block_id(int *block_id);
 
 /**
  * @brief Initializes the local process struct
@@ -65,7 +74,7 @@ MemoryBlock *process_block_get(int block_id);
  *
  * @return Pointer to the initialized MemoryBlock.
  */
-MemoryBlock *memory_block_init(int block_id, unsigned char *data);
+MemoryBlock *memory_block_init(int block_id, char *data);
 
 /**
  * @brief Frees the memory allocated for a MemoryBlock struct.
@@ -97,8 +106,10 @@ CacheEntry *cache_get(Cache *cache, int block_id);
  * @param cache Pointer to the cache.
  * @param block_id ID of the block to set.
  * @param data Pointer to the data to set in the block.
+ *
+ * @return Pointer to the new cache entry.
  */
-void cache_set(Cache *cache, int block_id, unsigned char *data);
+CacheEntry *cache_set(Cache *cache, int block_id, char *data);
 
 /**
  * @brief Invalidates an entry in the cache.

@@ -22,7 +22,7 @@ typedef enum {
  *
  * @return
  */
-int read(int position, char *buffer, int size);
+int dsm_read(int position, char *buffer, int size);
 
 /**
  * @brief Writes some data to the shared memory.
@@ -37,7 +37,7 @@ int read(int position, char *buffer, int size);
  *
  * @return
  */
-int write(int position, char *buffer, int size);
+int dsm_write(int position, char *buffer, int size);
 
 
 /**

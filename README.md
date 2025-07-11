@@ -4,6 +4,14 @@ TODO: add description
 
 ## How to run
 
+### 1. Install MPI
+
+```bash
+sudo apt install libopenmpi-dev
+```
+
+### 2. Execute
+
 Run the command below in your shell to compile and run the project:
 
 ```bash
