@@ -1,5 +1,5 @@
-#ifndef NETWORK_H
-#define NETWORK_H
+#ifndef DSM_MPI_H
+#define DSM_MPI_H
 
 #define MSG_DATA_MAX_SIZE 256 // Message data maximum size in bytes
 
@@ -34,12 +34,12 @@ typedef struct
  * @param argc Number of command line arguments.
  * @param argv Array of command line arguments.
  */
-void comm_init(int *argc, char ***argv);
+void dsm_mpi_init(int *argc, char **argv);
 
 /**
  * @brief Processes pending requests from other processes.
  */
-void comm_process_requests();
+void dsm_mpi_process_requests();
 
 /**
  * @brief Finalizes the communication layer.
@@ -47,6 +47,6 @@ void comm_process_requests();
  * This function cleans up the MPI environment and releases resources.
  * It should be called at the end of the program.
  */
-void comm_finalize();
+void dsm_mpi_finalize();
 
 #endif
