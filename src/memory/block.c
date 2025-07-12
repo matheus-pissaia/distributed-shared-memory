@@ -28,9 +28,8 @@ MemoryBlock *memory_block_init(int block_id, char *data)
     block->owner_id = get_owner_from_block_id(&block_id);
     block->data = calloc(DSM_BLOCK_SIZE , sizeof(char));
 
-    if (data != NULL) {
-        size_t data_len = strlen(data);
-        size_t copy_size = (data_len < DSM_BLOCK_SIZE) ? data_len : DSM_BLOCK_SIZE - 1;
+        int data_len = strlen(data);
+        int copy_size = (data_len < DSM_BLOCK_SIZE) ? data_len : DSM_BLOCK_SIZE - 1;
         memcpy(block->data, data, copy_size);
         block->data[copy_size] = '\0'; 
     }
