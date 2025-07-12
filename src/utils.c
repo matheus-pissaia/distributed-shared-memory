@@ -39,7 +39,8 @@ void memory_write(int position, int size, char *buffer)
         if (chunk_size > size - processed)
             chunk_size = size - processed;
 
-        if (chunk_size <= 0) break;
+        if (chunk_size <= 0)
+            break;
 
         memory_block_set(abs_position, block_offset, buffer + processed, chunk_size);
         processed += chunk_size;

@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
     char *write_data = "Hello World!";
     int str_len = strlen(write_data);
-    int total_size = str_len + 1; 
+    int total_size = str_len + 1;
 
     dsm_write(28, write_data, total_size);
 
