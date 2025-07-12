@@ -6,6 +6,7 @@
 
 void memory_read(int position, int size, char *buffer)
 {
+    memset(buffer, 0, size);
     int processed = 0;
 
     while (processed < size)
@@ -37,6 +38,8 @@ void memory_write(int position, int size, char *buffer)
 
         if (chunk_size > size - processed)
             chunk_size = size - processed;
+
+        if (chunk_size <= 0) break;
 
         memory_block_set(abs_position, block_offset, buffer + processed, chunk_size);
         processed += chunk_size;
