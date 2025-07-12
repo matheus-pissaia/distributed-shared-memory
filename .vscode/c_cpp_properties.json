@@ -11,6 +11,19 @@
             "cStandard": "gnu17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "Mac",
+            "includePath": ["${workspaceFolder}/**", "/opt/homebrew/include"],
+            "browse": {
+                "path": ["${workspaceFolder}/**", "/opt/homebrew/include"],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "defines": [],
+            "compilerPath": "/opt/homebrew/bin/mpicc",
+            "cStandard": "gnu17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "macos-clang-arm64"
         }
     ],
     "version": 4
