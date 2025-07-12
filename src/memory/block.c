@@ -109,4 +109,5 @@ void memory_block_set(int position, int offset, const char *data, int size)
     memcpy(msg.data, data, size); // Copy the data to be written
 
     MPI_Send(&msg, sizeof(DsmMsg), MPI_BYTE, owner_rank_id, OP_WRITE_REQ, MPI_COMM_WORLD);
+    MPI_Recv(NULL, 0, MPI_BYTE, owner_rank_id, OP_WRITE_RESP, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 }

@@ -29,7 +29,10 @@ void dsm_mpi_process_requests()
         MPI_Send(resp_data, req.size, MPI_BYTE, status.MPI_SOURCE, OP_READ_RESP, MPI_COMM_WORLD);
     }
     else if (req.opcode == OP_WRITE_REQ)
+    {
         memory_write(req.position, req.size, req.data);
+        MPI_Send(NULL, 0, MPI_BYTE, status.MPI_SOURCE, OP_WRITE_RESP, MPI_COMM_WORLD);
+    }
 
     else if (req.opcode == OP_INVALIDATE)
         cache_invalidate(process_get()->cache, req.position / DSM_BLOCK_SIZE);
