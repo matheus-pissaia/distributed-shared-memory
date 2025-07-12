@@ -6,7 +6,7 @@
 int main(int argc, char **argv)
 {
     char *write_data = "Hello World!";
-    const int size = strlen(write_data);
+    int size = strlen(write_data);
 
     dsm_write(28, write_data, size);
 

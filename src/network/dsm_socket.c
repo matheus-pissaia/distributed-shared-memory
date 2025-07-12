@@ -125,24 +125,24 @@ void dsm_socket_process_requests()
             req_data[bytes_recv] = '\0';
             printf("[PROCESS %d] Message received: %s\n", process_get()->rank_id, req_data);
 
-            if (strstr(req_data, "READ") != NULL)
+            if (strstr(req_data, READ_OP) != NULL)
             {
-                int position = atoi(strtok(req_data + strlen("READ"), " "));
+                int position = atoi(strtok(req_data + strlen(READ_OP), " "));
                 int size = atoi(strtok(NULL, " "));
 
                 memory_read(position, size, resp_data);
-                write(clients[i].fd, &resp_data, strlen(resp_data));
+                write(clients[i].fd, &resp_data, size);
                 continue;
             }
 
-            if (strstr(req_data, "WRITE") != NULL)
+            if (strstr(req_data, WRITE_OP) != NULL)
             {
-                int position = atoi(strtok(req_data + strlen("WRITE"), " "));
+                int position = atoi(strtok(req_data + strlen(WRITE_OP), " "));
                 int size = atoi(strtok(NULL, " "));
                 char *content = strtok(NULL, "");
 
                 memory_write(position, size, content);
-                write(clients[i].fd, &resp_data, strlen(resp_data));
+                write(clients[i].fd, &resp_data, size);
                 continue;
             }
         }

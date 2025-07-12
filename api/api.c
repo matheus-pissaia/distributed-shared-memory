@@ -37,7 +37,7 @@ int dsm_read(int position, char *buffer, int size)
     write(sock_fd, &request, strlen(request));
 
     char response[size];
-    int bytes = read(sock_fd, &response, DSM_SOCKET_MAX_BUFFER);
+    int bytes = read(sock_fd, &response, size);
     close(sock_fd);
 
     // TODO handle error on read

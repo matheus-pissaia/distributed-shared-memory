@@ -6,6 +6,9 @@
 #define DSM_SOCKET_MAX_BUFFER 256
 #define DSM_SOCKET_MAX_CLIENTS 16
 
+#define READ_OP "READ"
+#define WRITE_OP "WRITE"
+
 extern int DSM_BLOCK_SIZE;
 extern int DSM_BLOCK_COUNT;
 extern int DSM_PROCESS_COUNT;

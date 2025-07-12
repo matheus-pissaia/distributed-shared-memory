@@ -1,9 +1,6 @@
 #ifndef DSM_API_H
 #define DSM_API_H
 
-#define READ_OP "READ"
-#define WRITE_OP "WRITE"
-
 typedef enum
 {
     SOCKET_CREATION_ERROR = -1,
