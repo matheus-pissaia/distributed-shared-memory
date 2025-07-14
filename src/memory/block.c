@@ -16,7 +16,12 @@ static void broadcast_invalidate(int block_id)
         if (p_rank == local_process->rank_id)
             continue;
 
-        MPI_Send(&block_id, 1, MPI_INT, p_rank, OP_INVALIDATE, MPI_COMM_WORLD);
+        DsmMsg msg = {
+            .opcode = OP_INVALIDATE,
+            .position = block_id * DSM_BLOCK_SIZE,
+        };
+
+        MPI_Send(&msg, sizeof(DsmMsg), MPI_BYTE, p_rank, OP_INVALIDATE, MPI_COMM_WORLD);
     }
 }
 
