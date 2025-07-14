@@ -14,15 +14,15 @@ void memory_read(int position, int size, char *buffer)
         int abs_pos = position + processed;
         int block_id = abs_pos / DSM_BLOCK_SIZE;
         int block_offset = abs_pos % DSM_BLOCK_SIZE;
-        int chunk = DSM_BLOCK_SIZE - block_offset;
+        int chunk_size = DSM_BLOCK_SIZE - block_offset;
 
-        if (chunk > size - processed)
-            chunk = size - processed;
+        if (chunk_size > size - processed)
+            chunk_size = size - processed;
 
         MemoryBlock *block = memory_block_get(&block_id);
 
-        memcpy(buffer + processed, block->data + block_offset, chunk);
-        processed += chunk;
+        memcpy(buffer + processed, block->data + block_offset, chunk_size);
+        processed += chunk_size;
     }
 }
 
