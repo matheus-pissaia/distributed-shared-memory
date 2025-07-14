@@ -94,7 +94,7 @@ int dsm_socket_init()
 
 void dsm_socket_process_requests()
 {
-    if (poll(clients, DSM_SOCKET_MAX_CLIENTS, 1000) == -1)
+    if (poll(clients, DSM_SOCKET_MAX_CLIENTS, 100) == -1)
     {
         printf("[PROCESS %d] Error while polling\n", process_get()->rank_id);
         close(clients[0].fd);
