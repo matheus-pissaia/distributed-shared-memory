@@ -99,9 +99,36 @@ void force_cache_invalidate()
 // DSM_BLOCK_COUNT = 2;
 int main(int argc, char **argv)
 {
-    write_data_single_block();
-    write_data_multiple_blocks();
-    force_cache_invalidate();
+    int selected_test_case = -1;
+
+    while (selected_test_case != 0)
+    {
+        printf("\nSelect a test case that you want to run: \n");
+        printf("1 - Simple write and read data.\n");
+        printf("2 - Write and read data that occupies more than one block.\n");
+        printf("3 - Cache invalidation.\n");
+        printf("0 - Exit test runner.\n");
+
+        scanf("%d", &selected_test_case);
+
+        switch (selected_test_case)
+        {
+        case 0:
+            break;
+        case 1:
+            write_data_single_block();
+            break;
+        case 2:
+            write_data_multiple_blocks();
+            break;
+        case 3:
+            force_cache_invalidate();
+            break;
+        default:
+            printf("\nInvalid test case selected!\n");
+            break;
+        }
+    }
 
     return 0;
 }
