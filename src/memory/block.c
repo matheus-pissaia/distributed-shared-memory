@@ -114,7 +114,7 @@ void memory_block_set(int position, int offset, const char *data, int size)
     DsmMsg msg;
     msg.opcode = OP_WRITE_REQ;
     msg.position = position;
-    msg.size = size;              // Write the entire block
+    msg.size = size;
     memcpy(msg.data, data, size); // Copy the data to be written
 
     MPI_Send(&msg, sizeof(DsmMsg), MPI_BYTE, owner_rank_id, OP_WRITE_REQ, MPI_COMM_WORLD);
